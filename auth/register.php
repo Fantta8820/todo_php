@@ -18,8 +18,13 @@
 </script>
 
 <body>
+    <?php
+    if (isset($_COOKIE['token'])) {
+        header('Location: ../main/homepage.php');
+    }
+    ?>
     <main class="w-screen h-screen grid place-items-center">
-        <form class="w-3/4 flex flex-col items-center" method="POST" action="actions/register.php">
+        <form class="w-3/4 flex flex-col items-center" method="POST" action="actions/registerAction.php">
             <h1 class="text-4xl text-center font-bold">REGISTRAR</h1>
             <input type="text" name="name" placeholder="Nome"
                 class="input input-bordered w-full max-w-md mt-4 bg-gray-200 text-black" required />
@@ -29,7 +34,8 @@
             <a href="login.php" class="pt-4 hover:text-primary hover:underline">Já possui uma conta?</a>
             <?php
             session_start();
-            echo "<p class='text-error underline'>" . $_SESSION['error'] . "</p>"
+            echo "<p class='text-error underline'>" . $_SESSION['error'] . "</p>";
+            $_SESSION['error'] = "";
             ?>
         </form>
     </main>

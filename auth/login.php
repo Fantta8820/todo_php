@@ -18,13 +18,25 @@
 </script>
 
 <body>
+    <?php
+    if (isset($_COOKIE['token'])) {
+        header('Location: ../main/homepage.php');
+    }
+    ?>
     <main class="w-screen h-screen grid place-items-center">
-        <form class="w-3/4 flex flex-col items-center">
+        <form class="w-3/4 flex flex-col items-center" method="POST" action="actions/loginAction.php">
             <h1 class="text-4xl text-center font-bold">LOGIN</h1>
-            <input type="text" name="name" placeholder="Nome" class="input input-bordered w-full max-w-md mt-4 bg-gray-200 text-black" />
-            <input type="password" name="password" placeholder="Senha" class="input input-bordered w-full max-w-md mt-4 bg-gray-200 text-black" />            
-            <button class="btn btn-primary mt-4 w-full max-w-md">Logar</button>
+            <input type="text" name="name" placeholder="Nome"
+                class="input input-bordered w-full max-w-md mt-4 bg-gray-200 text-black" required />
+            <input type="password" name="password" placeholder="Senha"
+                class="input input-bordered w-full max-w-md mt-4 bg-gray-200 text-black" required />
+            <button class="btn btn-primary mt-4 w-full max-w-md" name="send">Logar</button>
             <a href="register.php" class="pt-4 hover:text-primary hover:underline">Não possui uma conta? Crie já!</a>
+            <?php
+            session_start();
+            echo "<p class='text-error underline'>" . $_SESSION['error'] . "</p>";
+            $_SESSION['error'] = "";
+            ?>
         </form>
     </main>
 </body>
