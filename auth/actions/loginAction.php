@@ -9,17 +9,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $password = $_POST['password'];
         $token = bin2hex(random_bytes(32));
 
-        $selectQuery = $connection->prepare("SELECT password FROM users WHERE name = :name");
+        $selectQuery = $connection->prepare("SELECT * FROM users WHERE name = :name");
         $selectQuery->bindParam("name", $name);
-        $selectQuery->execute();
+        $selectQuery->execute();      
 
         if ($selectQuery->rowCount() === 1) {
-            if (password_verify($password, $selectQuery->fetch(PDO::FETCH_ASSOC)['password'])) {
+            $userData = $selectQuery->fetch(PDO::FETCH_ASSOC);
+            if (password_verify($password, $userData['password'])) {
                 $updateQuery = $connection->prepare("UPDATE users SET token = :token WHERE name = :name");
                 $updateQuery->bindParam("name", $name);
                 $updateQuery->bindParam("token", $token);
                 if ($updateQuery->execute()) {
-                    setcookie("token", $token, strtotime('+7days'), "/todo_php");
+
+                    $userID = $userData['id_user'];
+                    $tableName = "task" . $userID;
+                    $_SESSION['task'] = $tableName;
+                    $_SESSION['userID'] = $userID;
+                    
+                    setcookie("token", $token, strtotime('+7days'), "/todo_php");                    
                     header('Location: ../../main/homepage.php');
                 };
             }else{
