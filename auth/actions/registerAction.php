@@ -27,15 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 $userData = $selectIdQuery->fetch(PDO::FETCH_ASSOC);
                 $userID = $userData['id_user'];
-                $tableName = "task" . $userID;
-                $_SESSION['task'] = $tableName;
-                $_SESSION['userID'] = $userID;
+                $tableName = "task" . $userID;                                
 
                 $sqlTable = "CREATE TABLE IF NOT EXISTS $tableName ( id_task INT AUTO_INCREMENT PRIMARY KEY, task_name VARCHAR(255) NOT NULL, task_description TEXT NOT NULL, isChecked BOOLEAN NOT NULL DEFAULT FALSE, id_user INT NOT NULL, FOREIGN KEY (id_user) REFERENCES users(id_user))";
 
                 $createQuery = $connection->prepare($sqlTable);                
                 $createQuery->execute();
 
+                setcookie("userID", $userID, strtotime('+7days'), "/todo_php");
+                setcookie("tableName", $tableName, strtotime('+7days'), "/todo_php");
                 setcookie("token", $token, strtotime('+7days'), "/todo_php");
                 header('Location: ../../main/homepage.php');
             }

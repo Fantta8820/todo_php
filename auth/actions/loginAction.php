@@ -22,11 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($updateQuery->execute()) {
 
                     $userID = $userData['id_user'];
-                    $tableName = "task" . $userID;
-                    $_SESSION['task'] = $tableName;
-                    $_SESSION['userID'] = $userID;
+                    $tableName = "task" . $userID;                                        
                     
-                    setcookie("token", $token, strtotime('+7days'), "/todo_php");                    
+                    setcookie("userID", $userID, strtotime('+7days'), "/todo_php");
+                    setcookie("tableName", $tableName, strtotime('+7days'), "/todo_php");
+                    setcookie("token", $token, strtotime('+7days'), "/todo_php");
                     header('Location: ../../main/homepage.php');
                 };
             }else{
@@ -39,4 +39,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-?>
+?>\

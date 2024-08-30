@@ -14,7 +14,7 @@
         daisyui: {
             themes: ['night'],
         },
-    }        
+    }
 </script>
 
 <body>
@@ -32,6 +32,8 @@
 
     if ($selectQuery->rowCount() === 0) {
         $_SESSION['error'] = "";
+        setcookie("userID", $_COOKIE['userID'], strtotime('-7days'), "/todo_php");
+        setcookie("tableName", $_COOKIE['tableName'], strtotime('-7days'), "/todo_php");
         setcookie("token", $_COOKIE['token'], strtotime('-7days'), "/todo_php");
         header('Location: ../auth/login.php');
     }
@@ -78,17 +80,21 @@
                 <h1 class="text-center text-black text-xl font-semibold">Tarefas Pendentes</h1>
                 <div class="divider divider-secondary"></div>
                 <?php
-                $tableName = $_SESSION['task'];
+                $tableName = $_COOKIE['tableName'];
 
-                $selectTaskQuery = $connection->prepare("SELECT * FROM $tableName");
-                $selectTaskQuery->execute();
+                $selectUncheckedQuery = $connection->prepare("SELECT * FROM $tableName WHERE isChecked = 0");
+                $selectUncheckedQuery->execute();
 
-                while ($taskInfo = $selectTaskQuery->fetch(PDO::FETCH_ASSOC)) {
+                while ($taskInfo = $selectUncheckedQuery->fetch(PDO::FETCH_ASSOC)) {
                     ?>
                     <label class="flex justify-between pt-4">
-                        <section class="flex items-center gap-4">
-                            <input type="checkbox" class="checkbox checkbox-primary" />
-                            <p class="text-xl text-black font-bold"><?php echo $taskInfo['task_name'] ?></p>
+                        <section class="flex gap-4">
+                            <form method="POST" action="actions/homepageAction.php">
+                                <input type="hidden" name="id_task" value="<?php echo $taskInfo['id_task'] ?>">
+
+                                <button name="check"><svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="0 0 24 24"><path fill="#38bdf8" d="M3 6.25A3.25 3.25 0 0 1 6.25 3h11.5A3.25 3.25 0 0 1 21 6.25v11.5A3.25 3.25 0 0 1 17.75 21H6.25A3.25 3.25 0 0 1 3 17.75zM6.25 5C5.56 5 5 5.56 5 6.25v11.5c0 .69.56 1.25 1.25 1.25h11.5c.69 0 1.25-.56 1.25-1.25V6.25C19 5.56 18.44 5 17.75 5z"/></svg></button>
+                            </form>
+                            <p class="text-xl text-black font-bold pt-1"><?php echo $taskInfo['id_task'] . ". " . $taskInfo['task_name'] ?></p>
                         </section>
                         <section class="flex gap-4">
                             <button class="btn btn-primary btn-sm w-24"
@@ -145,6 +151,80 @@
                 ?>
                 <h1 class="text-center text-black text-xl font-semibold pt-8">Tarefas Finalizadas</h1>
                 <div class="divider divider-secondary"></div>
+                <?php
+                $tableName = $_COOKIE['tableName'];
+
+                $selectCheckedQuery = $connection->prepare("SELECT * FROM $tableName WHERE isChecked = 1");
+                $selectCheckedQuery->execute();
+
+                while ($taskInfo = $selectCheckedQuery->fetch(PDO::FETCH_ASSOC)) {
+                    ?>
+                    <label class="flex justify-between pt-4">
+                        <section class="flex items-center gap-4">
+                            <form method="POST" action="actions/homepageAction.php">
+                                <input type="hidden" name="id_task" value="<?php echo $taskInfo['id_task'] ?>">
+
+                                <button name="check"><svg xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em"
+                                        viewBox="0 0 32 32">
+                                        <path fill="#38bdf8"
+                                            d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2M14 21.5l-5-4.957L10.59 15L14 18.346L21.409 11L23 12.577Z" />
+                                        <path fill="none" d="m14 21.5l-5-4.957L10.59 15L14 18.346L21.409 11L23 12.577Z" />
+                                    </svg></button>
+                            </form>
+                            <p class="text-xl text-black font-bold pt-1 line-through"><?php echo $taskInfo['id_task'] . ". " . $taskInfo['task_name'] ?></p>
+                        </section>
+                        <section class="flex gap-4">
+                            <button class="btn btn-primary btn-sm w-24"
+                                onclick="<?php echo "my_modal_view" . $taskInfo['id_task'] ?>.showModal()">Visualizar</button>
+
+                            <dialog id="<?php echo "my_modal_view" . $taskInfo['id_task'] ?>" class="modal">
+                                <div class="modal-box w-full flex flex-col items-center">
+                                    <main>
+                                        <h1 class="text-center text-2xl font-bold">Informações da Tarefa</h1>
+                                        <h1 class="text-center text-xl pt-8 font-semibold">Título</h1>
+                                        <p class="text-base text-center"><?php echo $taskInfo['task_name'] ?></p>
+                                        <div class="divider divider-secondary"></div>
+                                        <h1 class="text-center text-xl font-semibold">Descrição</h1>
+                                        <p class="text-base text-justify"><?php echo $taskInfo['task_description'] ?></p>
+                                    </main>
+                                </div>
+                                <form method="dialog" class="modal-backdrop">
+                                    <button>Fechar</button>
+                                </form>
+                            </dialog>
+
+                            <button class="btn btn-primary btn-sm w-24"
+                                onclick="<?php echo "my_modal_edit" . $taskInfo['id_task'] ?>.showModal()">Editar</button>
+
+                            <dialog id="<?php echo "my_modal_edit" . $taskInfo['id_task'] ?>" class="modal">
+                                <div class="modal-box w-full flex flex-col items-center">
+                                    <form method="POST" action="actions/homepageAction.php">
+                                        <h3 class="text-lg font-bold text-center font-bold">Editar Tarefa</h3>
+                                        <input
+                                            class="input input-bordered flex items-center gap-2 bg-white text-black w-96 h-8 rounded-lg border border-secondary border-2 mt-4"
+                                            placeholder="Nome da Tarefa" name="task_name"
+                                            value="<?php echo $taskInfo['task_name'] ?>" required>
+                                        <input
+                                            class="input input-bordered flex items-center gap-2 bg-white text-black w-96 h-8 rounded-lg border border-secondary border-2 mt-4"
+                                            placeholder="Descrição da tarefa" name="task_description"
+                                            value="<?php echo $taskInfo['task_description'] ?>" required>
+                                        <input type="hidden" name="id_task" value="<?php echo $taskInfo['id_task'] ?>">
+                                        <button class="btn btn-secondary btn-sm w-full mt-4" name="edit">Editar</button>
+                                    </form>
+                                </div>
+                                <form method="dialog" class="modal-backdrop">
+                                    <button>Fechar</button>
+                                </form>
+                            </dialog>
+
+                            <form method="POST" action="actions/homepageAction.php">
+                                <input type="hidden" name="id_task" value="<?php echo $taskInfo['id_task'] ?>">
+                                <button class="btn btn-error btn-sm w-24" name="delete">Deletar</button>
+                            </form>
+                        </section>
+                    </label>
+                    <?php
+                } ?>
             </main>
             <form method="POST" action="actions/homepageAction.php">
                 <button class="btn btn-primary mt-24" name="send">Deslogar</button>
