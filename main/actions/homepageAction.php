@@ -46,11 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $deleteQuery = $connection->prepare("DELETE FROM $tableName WHERE id_task = :id_task");
         $deleteQuery->bindParam("id_task", $id_task);
-        $deleteQuery->execute();        
+        $deleteQuery->execute();
 
         $selectQuery = $connection->prepare("SELECT id_task FROM $tableName");
         $selectQuery->execute();
-    
+
         $count = 1;
 
         while ($task = $selectQuery->fetch(PDO::FETCH_ASSOC)) {
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $updateQuery->execute();
             $count++;
         }
-        
+
         $resetAutoIncrement = $connection->prepare("ALTER TABLE $tableName AUTO_INCREMENT = 1");
         $resetAutoIncrement->execute();
 
@@ -96,6 +96,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             header("Location: ../homepage.php");
         }
+    }
+
+    if (isset($_POST['all']) || isset($_POST['clear'])) {
+        setcookie("status", "all", strtotime('+7days'), "/todo_php");
+        header("Location: ../homepage.php");
+    }
+
+    if (isset($_POST['pending'])) {
+        setcookie("status", "pending", strtotime('+7days'), "/todo_php");
+        header("Location: ../homepage.php");
+    }
+
+    if (isset($_POST['completed'])) {
+        setcookie("status", "completed", strtotime('+7days'), "/todo_php");
+        header("Location: ../homepage.php");
+    }
+
+    if (isset($_POST['search'])) {
+        $search = $_POST['search'];
+        setcookie("result", $search, strtotime('+7days'), "/todo_php");
+
+        setcookie("status", "search", strtotime('+7days'), "/todo_php");
+        header("Location: ../homepage.php");
     }
 }
 ?>

@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $createQuery = $connection->prepare($sqlTable);                
                 $createQuery->execute();
 
+                setcookie("status", "all", strtotime('+7days'), "/todo_php");
                 setcookie("userID", $userID, strtotime('+7days'), "/todo_php");
                 setcookie("tableName", $tableName, strtotime('+7days'), "/todo_php");
                 setcookie("token", $token, strtotime('+7days'), "/todo_php");
